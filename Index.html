@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stikton Tap Game</title>
+  <style>
+    body {
+      margin: 0;
+      background: #121212;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    #coin {
+      width: 150px;
+      height: 150px;
+      background-image: url('https://i.imgur.com/Ou7zPZL.png');
+      background-size: cover;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+      user-select: none;
+    }
+    #coin:active {
+      transform: scale(0.95);
+    }
+    #count {
+      margin-top: 20px;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Зарабатывай STIKTON!</h1>
+  <div id="coin"></div>
+  <div id="count">0 STIKTON</div>
+
+  <script>
+    let count = 0;
+    const coin = document.getElementById('coin');
+    const countDisplay = document.getElementById('count');
+
+    coin.addEventListener('click', () => {
+      count++;
+      countDisplay.textContent = count + ' STIKTON';
+
+      if (window.Telegram && window.Telegram.WebApp) {
+        Telegram.WebApp.sendData(count.toString());
+      }
+    });
+  </script>
+</body>
+</html>
