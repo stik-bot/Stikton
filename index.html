@@ -1,104 +1,105 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Stikton Tap Game</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-  /* Фон — градиент */
-  body {
-    margin: 0;
-    height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STIKTON</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle, #0f2027, #203a43, #2c5364);
+      height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
 
-  /* Логотип сверху */
-  #logo {
-    width: 120px;
-    margin-bottom: 20px;
-  }
+    /* Лого наверху */
+    #logo {
+      width: 100px;
+      margin-bottom: 10px;
+      animation: float 2s infinite ease-in-out;
+    }
 
-  h1 {
-    font-size: 28px;
-    margin-bottom: 10px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-shadow: 0 0 10px #ffd700;
-  }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
 
-  /* Кнопка монеты */
-  #coin {
-    width: 170px;
-    height: 170px;
-    background-image: url('https://i.imgur.com/Ou7zPZL.png');
-    background-size: cover;
-    cursor: pointer;
-    border-radius: 50%;
-    box-shadow:
-      0 0 15px #ffd700,
-      inset 0 0 20px #fff8b0;
-    transition: transform 0.1s ease;
-  }
-  #coin:active {
-    transform: scale(0.9);
-  }
+    h1 {
+      font-size: 24px;
+      margin: 5px 0 20px;
+      text-shadow: 0 0 10px #FFD700;
+    }
 
-  /* Счётчик */
-  #count {
-    margin-top: 25px;
-    font-size: 26px;
-    font-weight: 600;
-    text-shadow: 0 0 8px #ffd700;
-  }
-</style>
+    #coin {
+      width: 160px;
+      height: 160px;
+      background-image: url('https://i.imgur.com/Ou7zPZL.png'); /* Монета */
+      background-size: cover;
+      border-radius: 50%;
+      box-shadow: 0 0 20px #ffd700, 0 0 40px #ffed80;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    #coin:active {
+      transform: scale(0.9);
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 20px #ffd700; }
+      50% { box-shadow: 0 0 30px #ffea00; }
+    }
+
+    #count {
+      margin-top: 20px;
+      font-size: 22px;
+      font-weight: bold;
+      text-shadow: 0 0 8px #ffd700;
+    }
+  </style>
 </head>
 <body>
 
-<!-- Логотип -->
-<img id="logo" src="https://i.imgur.com/5cQ9dDl.png" alt="Stikton Logo" />
+  <!-- Логотип токена -->
+  <img id="logo" src="https://i.imgur.com/5cQ9dDl.png" alt="Stikton Logo" />
 
-<h1>Зарабатывай STIKTON!</h1>
+  <h1>Зарабатывай STIKTON!</h1>
 
-<div id="coin"></div>
+  <div id="coin"></div>
 
-<div id="count">0 STIKTON</div>
+  <div id="count">0 STIKTON</div>
 
-<script>
-  let count = 0;
+  <script>
+    let count = 0;
 
-  // Загружаем сохранённые очки из localStorage
-  if(localStorage.getItem('stikton_count')){
-    count = parseInt(localStorage.getItem('stikton_count'));
-  }
+    // Загружаем из localStorage
+    if(localStorage.getItem('stikton_count')){
+      count = parseInt(localStorage.getItem('stikton_count'));
+    }
 
-  const coin = document.getElementById('coin');
-  const counter = document.getElementById('count');
-
-  // Обновляем отображение при загрузке
-  counter.innerText = count + ' STIKTON';
-
-  coin.addEventListener('click', () => {
-    count++;
+    const coin = document.getElementById('coin');
+    const counter = document.getElementById('count');
     counter.innerText = count + ' STIKTON';
 
-    // Сохраняем очки в localStorage
-    localStorage.setItem('stikton_count', count);
+    coin.addEventListener('click', () => {
+      count++;
+      counter.innerText = count + ' STIKTON';
+      localStorage.setItem('stikton_count', count);
+    });
 
-    // Telegram.WebApp.sendData пока убрал, чтобы не было ошибок
-  });
-
-  // Готовность WebApp
-  if(window.Telegram?.WebApp){
-    Telegram.WebApp.ready();
-  }
-</script>
+    // Telegram WebApp
+    if(window.Telegram?.WebApp){
+      Telegram.WebApp.ready();
+    }
+  </script>
 
 </body>
 </html>
