@@ -2,46 +2,33 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
+  <title>Stikton Tap Game</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>STIKTON</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
       margin: 0;
-      background: radial-gradient(circle, #0f2027, #203a43, #2c5364);
-      height: 100vh;
-      font-family: 'Segoe UI', sans-serif;
-      color: white;
+      background: #121212;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
-    }
-
-    #logo {
-      width: 120px;
-      margin-bottom: 10px;
-      animation: float 2s infinite ease-in-out;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      color: white;
     }
 
     h1 {
       font-size: 24px;
-      margin: 10px 0;
-      text-shadow: 0 0 10px #FFD700;
+      margin-bottom: 20px;
     }
 
     #coin {
       width: 160px;
       height: 160px;
-      background-image: 
-  url('https://i.imgur.com/vPU2P4U.png');
+      background-image: url('https://i.imgur.com/vPU2P4U.png');
       background-size: cover;
+      background-position: center;
       border-radius: 50%;
       box-shadow: 0 0 20px #ffd700, 0 0 40px #ffed80;
       cursor: pointer;
@@ -49,88 +36,57 @@
     }
 
     #coin:active {
-      transform: scale(0.88) rotate(5deg);
-      box-shadow: 0 0 15px #ffdb4d;
+      transform: scale(0.9);
     }
 
-    #count, #energy {
-      margin-top: 15px;
+    #count {
+      margin-top: 20px;
       font-size: 20px;
-      text-shadow: 0 0 8px #ffd700;
     }
 
-    #upgrade {
-      margin-top: 25px;
-      padding: 10px 18px;
+    #energy {
+      margin-top: 10px;
       font-size: 16px;
-      background-color: #ffcc00;
-      border: none;
-      border-radius: 12px;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 0 8px #ffcc00;
+      color: #90ee90;
     }
   </style>
 </head>
 <body>
-
-  <img id="logo" src="https://i.imgur.com/9cRH6jZ.png" alt="Stikton Logo" />
   <h1>Зарабатывай STIKTON!</h1>
-
   <div id="coin"></div>
-
   <div id="count">0 STIKTON</div>
-  <div id="energy">⚡ Энергия: 5000</div>
-
-  <button id="upgrade">Улучшить (×2 за 1000 STIKTON)</button>
+  <div id="energy">🔋 Энергия: 5000</div>
 
   <script>
-    let count = parseInt(localStorage.getItem('stikton_count')) || 0;
-    let energy = parseInt(localStorage.getItem('stikton_energy')) || 5000;
-    let bonus = parseInt(localStorage.getItem('stikton_bonus')) || 1;
+    let count = 0;
+    let energy = 5000;
+    const maxEnergy = 5000;
 
     const coin = document.getElementById('coin');
     const counter = document.getElementById('count');
-    const energyBar = document.getElementById('energy');
-    const upgradeBtn = document.getElementById('upgrade');
+    const energyDisplay = document.getElementById('energy');
 
-    function updateUI() {
-      counter.innerText = count + ' STIKTON';
-      energyBar.innerText = '⚡ Энергия: ' + energy;
-    }
+    // Восстановление энергии
+    setInterval(() => {
+      if (energy < maxEnergy) {
+        energy = Math.min(energy + 3, maxEnergy);
+        energyDisplay.innerText = `🔋 Энергия: ${energy}`;
+      }
+    }, 1000); // раз в секунду
 
-    updateUI();
-
+    // Клик по монете
     coin.addEventListener('click', () => {
       if (energy >= 5) {
         energy -= 5;
-        count += bonus;
-        localStorage.setItem('stikton_count', count);
-        localStorage.setItem('stikton_energy', energy);
-        updateUI();
+        count++;
+        counter.innerText = count + ' STIKTON';
+        energyDisplay.innerText = `🔋 Энергия: ${energy}`;
       } else {
-        alert("Недостаточно энергии! 🔋");
+        alert('Недостаточно энергии! ⛔ Жди восстановления.');
       }
     });
 
-    upgradeBtn.addEventListener('click', () => {
-      if (count >= 1000) {
-        count -= 1000;
-        bonus *= 2;
-        localStorage.setItem('stikton_count', count);
-        localStorage.setItem('stikton_bonus', bonus);
-        alert("Поздравляем! Теперь каждый клик = " + bonus + " STIKTON!");
-        updateUI();
-      } else {
-        alert("Нужно 1000 STIKTON для улучшения!");
-      }
-    });
-
-    if (window.Telegram?.WebApp) {
-      Telegram.WebApp.ready();
-    }
+    Telegram.WebApp?.ready();
   </script>
-  
 </body>
 </html>
