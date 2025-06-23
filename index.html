@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>be1.ru</title>
+</head>
+<body>
+<p>&lt;!DOCTYPE html&gt;&lt;html&gt;</p>
+
+<p>&lt;head&gt;</p>
+
+<p>&nbsp; &lt;meta charset=&quot;UTF-8&quot;&gt;</p>
+
+<p>&nbsp; &lt;title&gt;Stikton Tap Game&lt;/title&gt;</p>
+
+<p>&nbsp; &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;</p>
+
+<p>&nbsp; &lt;script src=&quot;https://telegram.org/js/telegram-web-app.js&quot;&gt;&lt;/script&gt;</p>
+
+<p>&nbsp; &lt;style&gt;</p>
+
+<p>&nbsp; &nbsp; body {</p>
+
+<p>&nbsp; &nbsp; &nbsp; margin: 0;</p>
+
+<p>&nbsp; &nbsp; &nbsp; background: #121212;</p>
+
+<p>&nbsp; &nbsp; &nbsp; display: flex;</p>
+
+<p>&nbsp; &nbsp; &nbsp; flex-direction: column;</p>
+
+<p>&nbsp; &nbsp; &nbsp; align-items: center;</p>
+
+<p>&nbsp; &nbsp; &nbsp; justify-content: center;</p>
+
+<p>&nbsp; &nbsp; &nbsp; height: 100vh;</p>
+
+<p>&nbsp; &nbsp; &nbsp; font-family: Arial, sans-serif;</p>
+
+<p>&nbsp; &nbsp; &nbsp; color: white;</p>
+
+<p>&nbsp; &nbsp; }</p>
+
+<p>&nbsp; &nbsp; h1 {</p>
+
+<p>&nbsp; &nbsp; &nbsp; font-size: 24px;</p>
+
+<p>&nbsp; &nbsp; &nbsp; margin-bottom: 20px;</p>
+
+<p>&nbsp; &nbsp; }</p>
+
+<p>&nbsp; &nbsp; #coin {</p>
+
+<p>&nbsp; &nbsp; &nbsp; width: 150px;</p>
+
+<p>&nbsp; &nbsp; &nbsp; height: 150px;</p>
+
+<p>&nbsp; &nbsp; &nbsp; background-image: url(&#39;https://i.imgur.com/Ou7zPZL.png&#39;);</p>
+
+<p>&nbsp; &nbsp; &nbsp; background-size: cover;</p>
+
+<p>&nbsp; &nbsp; &nbsp; cursor: pointer;</p>
+
+<p>&nbsp; &nbsp; &nbsp; transition: transform 0.1s ease;</p>
+
+<p>&nbsp; &nbsp; }</p>
+
+<p>&nbsp; &nbsp; #coin:active {</p>
+
+<p>&nbsp; &nbsp; &nbsp; transform: scale(0.95);</p>
+
+<p>&nbsp; &nbsp; }</p>
+
+<p>&nbsp; &nbsp; #count {</p>
+
+<p>&nbsp; &nbsp; &nbsp; margin-top: 20px;</p>
+
+<p>&nbsp; &nbsp; &nbsp; font-size: 20px;</p>
+
+<p>&nbsp; &nbsp; }</p>
+
+<p>&nbsp; &lt;/style&gt;</p>
+
+<p>&lt;/head&gt;</p>
+
+<p>&lt;body&gt;</p>
+
+<p>&nbsp; &lt;h1&gt;Зарабатывай STIKTON!&lt;/h1&gt;</p>
+
+<p>&nbsp; &lt;div id=&quot;coin&quot;&gt;&lt;/div&gt;</p>
+
+<p>&nbsp; &lt;div id=&quot;count&quot;&gt;0 STIKTON&lt;/div&gt; &lt;script&gt;</p>
+
+<p>&nbsp; &nbsp; let count = 0;</p>
+
+<p>&nbsp; &nbsp; const coin = document.getElementById(&#39;coin&#39;);</p>
+
+<p>&nbsp; &nbsp; const counter = document.getElementById(&#39;count&#39;);</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp; &nbsp; coin.addEventListener(&#39;click&#39;, () =&gt; {</p>
+
+<p>&nbsp; &nbsp; &nbsp; count++;</p>
+
+<p>&nbsp; &nbsp; &nbsp; counter.innerText = count + &#39; STIKTON&#39;;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp; &nbsp; &nbsp; // Отправка данных в Telegram</p>
+
+<p>&nbsp; &nbsp; &nbsp; if (window.Telegram.WebApp) {</p>
+
+<p>&nbsp; &nbsp; &nbsp; &nbsp; Telegram.WebApp.sendData(JSON.stringify({ taps: count }));</p>
+
+<p>&nbsp; &nbsp; &nbsp; }</p>
+
+<p>&nbsp; &nbsp; });</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp; &nbsp; Telegram.WebApp.ready();</p>
+
+<p>&nbsp; &lt;/script&gt;&lt;/body&gt;</p>
+
+<p>&lt;/html&gt;</p>
+</body>
+</html>
