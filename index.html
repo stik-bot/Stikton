@@ -19,9 +19,8 @@
       overflow: hidden;
     }
 
-    /* Лого наверху */
     #logo {
-      width: 100px;
+      width: 120px;
       margin-bottom: 10px;
       animation: float 2s infinite ease-in-out;
     }
@@ -33,73 +32,104 @@
 
     h1 {
       font-size: 24px;
-      margin: 5px 0 20px;
+      margin: 10px 0;
       text-shadow: 0 0 10px #FFD700;
     }
 
     #coin {
       width: 160px;
       height: 160px;
-      background-image: url('https://i.imgur.com/Ou7zPZL.png'); /* Монета */
+      background-image: url('https://stik-bot.github.io/Stikton/s_coin_gold.png');
       background-size: cover;
       border-radius: 50%;
       box-shadow: 0 0 20px #ffd700, 0 0 40px #ffed80;
       cursor: pointer;
       transition: transform 0.1s ease;
-      animation: pulse 2s infinite ease-in-out;
     }
 
     #coin:active {
-      transform: scale(0.9);
+      transform: scale(0.88) rotate(5deg);
+      box-shadow: 0 0 15px #ffdb4d;
     }
 
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 20px #ffd700; }
-      50% { box-shadow: 0 0 30px #ffea00; }
-    }
-
-    #count {
-      margin-top: 20px;
-      font-size: 22px;
-      font-weight: bold;
+    #count, #energy {
+      margin-top: 15px;
+      font-size: 20px;
       text-shadow: 0 0 8px #ffd700;
+    }
+
+    #upgrade {
+      margin-top: 25px;
+      padding: 10px 18px;
+      font-size: 16px;
+      background-color: #ffcc00;
+      border: none;
+      border-radius: 12px;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 8px #ffcc00;
     }
   </style>
 </head>
 <body>
 
-  <!-- Логотип токена -->
-  <img id="logo" src="https://i.imgur.com/5cQ9dDl.png" alt="Stikton Logo" />
-
+  <img id="logo" src="https://i.imgur.com/9cRH6jZ.png" alt="Stikton Logo" />
   <h1>Зарабатывай STIKTON!</h1>
 
   <div id="coin"></div>
 
   <div id="count">0 STIKTON</div>
+  <div id="energy">⚡ Энергия: 5000</div>
+
+  <button id="upgrade">Улучшить (×2 за 1000 STIKTON)</button>
 
   <script>
-    let count = 0;
-
-    // Загружаем из localStorage
-    if(localStorage.getItem('stikton_count')){
-      count = parseInt(localStorage.getItem('stikton_count'));
-    }
+    let count = parseInt(localStorage.getItem('stikton_count')) || 0;
+    let energy = parseInt(localStorage.getItem('stikton_energy')) || 5000;
+    let bonus = parseInt(localStorage.getItem('stikton_bonus')) || 1;
 
     const coin = document.getElementById('coin');
     const counter = document.getElementById('count');
-    counter.innerText = count + ' STIKTON';
+    const energyBar = document.getElementById('energy');
+    const upgradeBtn = document.getElementById('upgrade');
+
+    function updateUI() {
+      counter.innerText = count + ' STIKTON';
+      energyBar.innerText = '⚡ Энергия: ' + energy;
+    }
+
+    updateUI();
 
     coin.addEventListener('click', () => {
-      count++;
-      counter.innerText = count + ' STIKTON';
-      localStorage.setItem('stikton_count', count);
+      if (energy >= 5) {
+        energy -= 5;
+        count += bonus;
+        localStorage.setItem('stikton_count', count);
+        localStorage.setItem('stikton_energy', energy);
+        updateUI();
+      } else {
+        alert("Недостаточно энергии! 🔋");
+      }
     });
 
-    // Telegram WebApp
-    if(window.Telegram?.WebApp){
+    upgradeBtn.addEventListener('click', () => {
+      if (count >= 1000) {
+        count -= 1000;
+        bonus *= 2;
+        localStorage.setItem('stikton_count', count);
+        localStorage.setItem('stikton_bonus', bonus);
+        alert("Поздравляем! Теперь каждый клик = " + bonus + " STIKTON!");
+        updateUI();
+      } else {
+        alert("Нужно 1000 STIKTON для улучшения!");
+      }
+    });
+
+    if (window.Telegram?.WebApp) {
       Telegram.WebApp.ready();
     }
   </script>
-
+  
 </body>
 </html>
