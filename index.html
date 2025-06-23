@@ -66,20 +66,19 @@
     const counter = document.getElementById('count');
     const energyDisplay = document.getElementById('energy');
 
-    // Восстановление энергии
+    // Автовосстановление энергии
     setInterval(() => {
       if (energy < maxEnergy) {
         energy = Math.min(energy + 3, maxEnergy);
         energyDisplay.innerText = `🔋 Энергия: ${energy}`;
       }
-    }, 1000); // раз в секунду
+    }, 1000);
 
-    // Клик по монете
     coin.addEventListener('click', () => {
       if (energy >= 5) {
         energy -= 5;
         count++;
-        counter.innerText = count + ' STIKTON';
+        counter.innerText = `${count} STIKTON`;
         energyDisplay.innerText = `🔋 Энергия: ${energy}`;
       } else {
         alert('Недостаточно энергии! ⛔ Жди восстановления.');
