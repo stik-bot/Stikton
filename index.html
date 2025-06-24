@@ -16,12 +16,13 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
+      overflow: hidden;
     }
 
     #coin {
       width: 200px;
       height: 200px;
-      background-image: url('https://i.imgur.com/Fj4qaP3.png');
+      background-image: url('https://stik-bot.github.io/Stikton/stikton-icon.png'); /* замени если путь другой */
       background-size: cover;
       background-position: center;
       transition: transform 0.1s ease;
@@ -47,10 +48,10 @@
 
     .btn-container {
       display: flex;
-      gap: 20px;
-      margin-top: 30px;
+      gap: 10px;
       flex-wrap: wrap;
       justify-content: center;
+      margin-top: 30px;
     }
 
     .btn {
@@ -74,16 +75,18 @@
   <div id="count">0 STIK</div>
   <div id="energy">Energy: 5000</div>
   <div class="btn-container">
-    <button class="btn" onclick="buyClickPower()">Upgrade Tap (+1)</button>
-    <button class="btn" onclick="buyAutoTap()">Upgrade AutoTap (+1/sec)</button>
+    <button class="btn" onclick="buyClickPower()">Upgrade Tap</button>
+    <button class="btn" onclick="buyAutoTap()">Upgrade AutoTap</button>
+    <button class="btn" onclick="buyEnergy()">Upgrade Energy</button>
     <button class="btn" onclick="reset()">Reset</button>
   </div>
 
   <script>
     let count = parseInt(localStorage.getItem('count')) || 0;
     let energy = parseInt(localStorage.getItem('energy')) || 5000;
+    let maxEnergy = parseInt(localStorage.getItem('maxEnergy')) || 5000;
     let clickPower = parseInt(localStorage.getItem('clickPower')) || 1;
-    let autoTap = parseInt(localStorage.getItem('autoTap')) || 1;
+    let autoTap = parseInt(localStorage.getItem('autoTap')) || 0;
 
     const coin = document.getElementById('coin');
     const counter = document.getElementById('count');
@@ -100,20 +103,23 @@
       localStorage.setItem('energy', energy);
       localStorage.setItem('clickPower', clickPower);
       localStorage.setItem('autoTap', autoTap);
+      localStorage.setItem('maxEnergy', maxEnergy);
     }
 
     // Восстановление энергии
     setInterval(() => {
-      if (energy < 5000) {
-        energy = Math.min(energy + 3, 5000);
+      if (energy < maxEnergy) {
+        energy = Math.min(energy + 3, maxEnergy);
         updateUI();
       }
     }, 1000);
 
-    // Автотап
+    // Автотап (только если куплено)
     setInterval(() => {
-      count += autoTap;
-      updateUI();
+      if (autoTap > 0) {
+        count += autoTap;
+        updateUI();
+      }
     }, 1000);
 
     coin.addEventListener('click', () => {
@@ -125,26 +131,39 @@
     });
 
     function buyClickPower() {
-      const price = clickPower * 20;
+      const price = clickPower === 1 ? 1000 : clickPower === 2 ? 1500 : clickPower === 3 ? 3000 : clickPower * 2000;
       if (count >= price) {
         count -= price;
         clickPower += 1;
+        alert(`Tap power: ${clickPower}`);
         updateUI();
-        alert(`Tap Power увеличен! Теперь: ${clickPower} за клик`);
       } else {
         alert(`Нужно ${price} STIK для улучшения`);
       }
     }
 
     function buyAutoTap() {
-      const price = autoTap * 50;
+      const price = autoTap === 0 ? 3000 : autoTap === 1 ? 5000 : autoTap === 2 ? 8000 : autoTap * 4000;
       if (count >= price) {
         count -= price;
         autoTap += 1;
+        alert(`AutoTap: ${autoTap}/сек`);
         updateUI();
-        alert(`AutoTap увеличен! Теперь: ${autoTap}/сек`);
       } else {
         alert(`Нужно ${price} STIK для автотапа`);
+      }
+    }
+
+    function buyEnergy() {
+      const price = 2000;
+      if (count >= price) {
+        count -= price;
+        maxEnergy += 1000;
+        energy = maxEnergy;
+        alert(`Максимальная энергия теперь: ${maxEnergy}`);
+        updateUI();
+      } else {
+        alert(`Нужно ${price} STIK для увеличения энергии`);
       }
     }
 
@@ -152,8 +171,9 @@
       if (confirm("Сбросить прогресс?")) {
         count = 0;
         energy = 5000;
+        maxEnergy = 5000;
         clickPower = 1;
-        autoTap = 1;
+        autoTap = 0;
         updateUI();
       }
     }
