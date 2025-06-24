@@ -22,15 +22,24 @@
     #coin {
       width: 200px;
       height: 200px;
-      background-image: url('https://stik-bot.github.io/Stikton/stikton-icon.png'); /* замени если путь другой */
+      background-image: url('https://stik-bot.github.io/Stikton/stikton-icon.png');
       background-size: cover;
       background-position: center;
-      transition: transform 0.1s ease;
       cursor: pointer;
+      user-select: none;
+      /* для анимации */
+      transition: transform 0.1s ease;
     }
 
-    #coin:active {
-      transform: scale(0.9);
+    /* Класс для анимации пульса */
+    .pulse {
+      animation: pulseScale 0.15s ease forwards;
+    }
+
+    @keyframes pulseScale {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.9); }
+      100% { transform: scale(1); }
     }
 
     #count {
@@ -38,12 +47,31 @@
       font-size: 32px;
       font-weight: bold;
       color: #cc99ff;
+      user-select: none;
     }
 
-    #energy {
+    #energy-bar-container {
+      width: 220px;
+      height: 20px;
+      background: #333;
+      border-radius: 10px;
+      margin-top: 10px;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    #energy-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #90ee90, #50c878);
+      width: 100%;
+      transition: width 0.3s ease;
+    }
+
+    #energy-text {
+      margin-top: 5px;
       font-size: 18px;
       color: #90ee90;
-      margin-top: 5px;
+      user-select: none;
     }
 
     .btn-container {
@@ -63,23 +91,57 @@
       color: #cc99ff;
       cursor: pointer;
       transition: background 0.3s ease;
+      user-select: none;
+      min-width: 160px;
+      text-align: center;
+      position: relative;
     }
 
     .btn:hover {
       background: #cc99ff22;
     }
+
+    /* Всплывающая подсказка */
+    #message {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #cc99ffdd;
+      color: #1a0a2d;
+      padding: 10px 20px;
+      border-radius: 15px;
+      font-weight: bold;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      z-index: 1000;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
-  <div id="coin"></div>
+  <div id="coin" title="Tap me!"></div>
   <div id="count">0 STIK</div>
-  <div id="energy">Energy: 5000</div>
+
+  <div id="energy-bar-container" title="Energy">
+    <div id="energy-bar"></div>
+  </div>
+  <div id="energy-text">Energy: 5000 / 5000</div>
+
   <div class="btn-container">
-    <button class="btn" onclick="buyClickPower()">Upgrade Tap</button>
-    <button class="btn" onclick="buyAutoTap()">Upgrade AutoTap</button>
-    <button class="btn" onclick="buyEnergy()">Upgrade Energy</button>
+    <button class="btn" id="btn-click-power" onclick="buyClickPower()">Upgrade Tap</button>
+    <button class="btn" id="btn-auto-tap" onclick="buyAutoTap()">Upgrade AutoTap</button>
+    <button class="btn" id="btn-energy" onclick="buyEnergy()">Upgrade Energy</button>
     <button class="btn" onclick="reset()">Reset</button>
   </div>
+
+  <div id="message"></div>
+
+  <!-- Звуки -->
+  <audio id="sound-click" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
+  <audio id="sound-buy" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
+  <audio id="sound-error" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" preload="auto"></audio>
 
   <script>
     let count = parseInt(localStorage.getItem('count')) || 0;
@@ -90,11 +152,47 @@
 
     const coin = document.getElementById('coin');
     const counter = document.getElementById('count');
-    const energyDisplay = document.getElementById('energy');
+    const energyBar = document.getElementById('energy-bar');
+    const energyText = document.getElementById('energy-text');
+    const btnClickPower = document.getElementById('btn-click-power');
+    const btnAutoTap = document.getElementById('btn-auto-tap');
+    const btnEnergy = document.getElementById('btn-energy');
+    const message = document.getElementById('message');
+
+    // Звуки
+    const soundClick = document.getElementById('sound-click');
+    const soundBuy = document.getElementById('sound-buy');
+    const soundError = document.getElementById('sound-error');
+
+    // Показать временное сообщение
+    function showMessage(text) {
+      message.textContent = text;
+      message.style.opacity = '1';
+      setTimeout(() => {
+        message.style.opacity = '0';
+      }, 2500);
+    }
+
+    // Обновить цены на кнопках
+    function updateButtonPrices() {
+      const clickPrice = clickPower === 1 ? 1000 : clickPower === 2 ? 1500 : clickPower === 3 ? 3000 : clickPower * 2000;
+      btnClickPower.textContent = `Upgrade Tap (${clickPrice} STIK)`;
+
+      const autoPrice = autoTap === 0 ? 3000 : autoTap === 1 ? 5000 : autoTap === 2 ? 8000 : autoTap * 4000;
+      btnAutoTap.textContent = `Upgrade AutoTap (${autoPrice} STIK)`;
+
+      const energyPrice = 2000;
+      btnEnergy.textContent = `Upgrade Energy (${energyPrice} STIK)`;
+    }
 
     function updateUI() {
       counter.innerText = `${count} STIK`;
-      energyDisplay.innerText = `Energy: ${energy}`;
+      energyText.innerText = `Energy: ${energy} / ${maxEnergy}`;
+
+      const energyPercent = (energy / maxEnergy) * 100;
+      energyBar.style.width = energyPercent + '%';
+
+      updateButtonPrices();
       saveData();
     }
 
@@ -122,12 +220,23 @@
       }
     }, 1000);
 
+    // Клик по монете
     coin.addEventListener('click', () => {
-      if (energy >= 5) {
-        energy -= 5;
-        count += clickPower;
-        updateUI();
+      if (energy < 5) {
+        showMessage('Недостаточно энергии!');
+        soundError.play();
+        return;
       }
+      energy -= 5;
+      count += clickPower;
+      updateUI();
+
+      // Анимация пульса
+      coin.classList.add('pulse');
+      setTimeout(() => coin.classList.remove('pulse'), 160);
+
+      soundClick.currentTime = 0;
+      soundClick.play();
     });
 
     function buyClickPower() {
@@ -135,10 +244,12 @@
       if (count >= price) {
         count -= price;
         clickPower += 1;
-        alert(`Tap power: ${clickPower}`);
+        showMessage(`Tap power upgraded to ${clickPower}!`);
+        soundBuy.play();
         updateUI();
       } else {
-        alert(`Нужно ${price} STIK для улучшения`);
+        showMessage(`Нужно ${price} STIK для улучшения`);
+        soundError.play();
       }
     }
 
@@ -147,10 +258,12 @@
       if (count >= price) {
         count -= price;
         autoTap += 1;
-        alert(`AutoTap: ${autoTap}/сек`);
+        showMessage(`AutoTap upgraded to ${autoTap}/сек!`);
+        soundBuy.play();
         updateUI();
       } else {
-        alert(`Нужно ${price} STIK для автотапа`);
+        showMessage(`Нужно ${price} STIK для автотапа`);
+        soundError.play();
       }
     }
 
@@ -160,10 +273,12 @@
         count -= price;
         maxEnergy += 1000;
         energy = maxEnergy;
-        alert(`Максимальная энергия теперь: ${maxEnergy}`);
+        showMessage(`Максимальная энергия теперь: ${maxEnergy}`);
+        soundBuy.play();
         updateUI();
       } else {
-        alert(`Нужно ${price} STIK для увеличения энергии`);
+        showMessage(`Нужно ${price} STIK для увеличения энергии`);
+        soundError.play();
       }
     }
 
@@ -174,10 +289,13 @@
         maxEnergy = 5000;
         clickPower = 1;
         autoTap = 0;
+        showMessage("Прогресс сброшен!");
+        soundBuy.play();
         updateUI();
       }
     }
 
+    // Инициализация
     updateUI();
     Telegram.WebApp?.ready();
   </script>
