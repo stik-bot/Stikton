@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html lang="ru">
+<!DOCTYPE html><html>
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Stikton Tap Game</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
@@ -17,37 +16,38 @@
       font-family: Arial, sans-serif;
       color: white;
     }
-
     h1 {
       font-size: 24px;
       margin-bottom: 20px;
     }
-
     #coin {
-      width: 160px;
-      height: 160px;
+      width: 150px;
+      height: 150px;
       background-image: url('https://i.imgur.com/vPU2P4U.png');
       background-size: cover;
-      background-position: center;
-      border-radius: 50%;
-      box-shadow: 0 0 20px #ffd700, 0 0 40px #ffed80;
       cursor: pointer;
       transition: transform 0.1s ease;
     }
-
     #coin:active {
-      transform: scale(0.9);
+      transform: scale(0.95);
     }
-
     #count {
       margin-top: 20px;
       font-size: 20px;
     }
-
-    #energy {
+    #autotap-status {
       margin-top: 10px;
       font-size: 16px;
-      color: #90ee90;
+    }
+    #buy-autotap {
+      margin-top: 10px;
+      background: #ffc107;
+      border: none;
+      color: #000;
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -55,61 +55,59 @@
   <h1>Зарабатывай STIKTON!</h1>
   <div id="coin"></div>
   <div id="count">0 STIKTON</div>
-  <div id="energy">🔋 Энергия: 5000</div>
-
-  <script>
+  <div id="autotap-status">Автотап: выключен</div>
+  <button id="buy-autotap">Купить автотап (100 коинов)</button>  <script>
     let count = 0;
-    let energy = 5000;
-    const maxEnergy = 5000;
-
+    let coins = 0;
+    let autotapLevel = 0;
     const coin = document.getElementById('coin');
     const counter = document.getElementById('count');
-    const energyDisplay = document.getElementById('energy');
+    const status = document.getElementById('autotap-status');
+    const button = document.getElementById('buy-autotap');
 
-    // Автовосстановление энергии
-    setInterval(() => {
-      if (energy < maxEnergy) {
-        energy = Math.min(energy + 3, maxEnergy);
-        energyDisplay.innerText = `🔋 Энергия: ${energy}`;
-      }
-    }, 1000);
+    if (localStorage.getItem('coins')) {
+      coins = parseInt(localStorage.getItem('coins'));
+      count = coins;
+    }
+    counter.innerText = coins + ' STIKTON';
 
     coin.addEventListener('click', () => {
-      if (energy >= 5) {
-        energy -= 5;
-        count+
-        counter.innerText = `${count} STIKTON`;
-        energyDisplay.innerText = `🔋 Энергия: ${energy}`;
-      } else {
-        alert('Недостаточно энергии! ⛔ Жди восстановления.');
+      count++;
+      coins++;
+      counter.innerText = coins + ' STIKTON';
+      localStorage.setItem('coins', coins);
+      if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.sendData(JSON.stringify({ taps: 1 }));
       }
     });
 
-    Telegram.WebApp?.ready();
-  </script>
-</body>
+    Telegram.WebApp.ready();
+
+    // Автотап каждую минуту
+    setInterval(() => {
+      if (autotapLevel > 0) {
+        const tapAmount = autotapLevel * 15;
+        coins += tapAmount;
+        count += tapAmount;
+        counter.innerText = coins + ' STIKTON';
+        localStorage.setItem('coins', coins);
+        if (window.Telegram && Telegram.WebApp) {
+          Telegram.WebApp.sendData(JSON.stringify({ taps: tapAmount }));
+        }
+      }
+    }, 60000);
+
+    button.onclick = () => {
+      if (coins >= 100) {
+        coins -= 100;
+        autotapLevel++;
+        localStorage.setItem('coins', coins);
+        counter.innerText = coins + ' STIKTON';
+        status.innerText = `Автотап: уровень ${autotapLevel}`;
+        alert('✅ Автотап улучшен!');
+      } else {
+        alert('❌ Недостаточно STIKTON');
+      }
+    };
+  </script></body>
 </html>
-<script>
-  let count = 0;
-  const coin = document.getElementById('coin');
-  const counter = document.getElementById('count');
-
-  // Проверяем есть ли сохранённое значение
-  if (localStorage.getItem('stikton_count')) {
-    count = parseInt(localStorage.getItem('stikton_count'));
-    counter.innerText = count + ' STIKTON';
-  }
-
-  coin.addEventListener('click', () => {
-    count++;
-    counter.innerText = count + ' STIKTON';
-    localStorage.setItem('stikton_count', count);
-
-    // Отправка данных в Telegram
-    if (window.Telegram && Telegram.WebApp) {
-      Telegram.WebApp.sendData(JSON.stringify({ taps: 1 }));
-    }
-  });
-
-  Telegram.WebApp.ready();
-</script>
