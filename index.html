@@ -77,7 +77,7 @@
     coin.addEventListener('click', () => {
       if (energy >= 5) {
         energy -= 5;
-        count++;
+        count+
         counter.innerText = `${count} STIKTON`;
         energyDisplay.innerText = `🔋 Энергия: ${energy}`;
       } else {
@@ -89,3 +89,27 @@
   </script>
 </body>
 </html>
+<script>
+  let count = 0;
+  const coin = document.getElementById('coin');
+  const counter = document.getElementById('count');
+
+  // Проверяем есть ли сохранённое значение
+  if (localStorage.getItem('stikton_count')) {
+    count = parseInt(localStorage.getItem('stikton_count'));
+    counter.innerText = count + ' STIKTON';
+  }
+
+  coin.addEventListener('click', () => {
+    count++;
+    counter.innerText = count + ' STIKTON';
+    localStorage.setItem('stikton_count', count);
+
+    // Отправка данных в Telegram
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.sendData(JSON.stringify({ taps: 1 }));
+    }
+  });
+
+  Telegram.WebApp.ready();
+</script>
