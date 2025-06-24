@@ -21,7 +21,7 @@
     #coin {
       width: 200px;
       height: 200px;
-      background-image: url('https://i.imgur.com/Fj4qaP3.png'); /* 🔶 Монета */
+      background-image: url('https://i.imgur.com/Fj4qaP3.png');
       background-size: cover;
       background-position: center;
       transition: transform 0.1s ease;
@@ -49,6 +49,8 @@
       display: flex;
       gap: 20px;
       margin-top: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .btn {
@@ -72,52 +74,91 @@
   <div id="count">0 STIK</div>
   <div id="energy">Energy: 5000</div>
   <div class="btn-container">
-    <button class="btn" onclick="upgrade()">Upgrade</button>
-    <button class="btn" onclick="shop()">Shop</button>
+    <button class="btn" onclick="buyClickPower()">Upgrade Tap (+1)</button>
+    <button class="btn" onclick="buyAutoTap()">Upgrade AutoTap (+1/sec)</button>
+    <button class="btn" onclick="reset()">Reset</button>
   </div>
 
   <script>
-    let count = 0;
-    let energy = 5000;
-    const maxEnergy = 5000;
-    let clickPower = 1;
-    let autoTap = 1;
+    let count = parseInt(localStorage.getItem('count')) || 0;
+    let energy = parseInt(localStorage.getItem('energy')) || 5000;
+    let clickPower = parseInt(localStorage.getItem('clickPower')) || 1;
+    let autoTap = parseInt(localStorage.getItem('autoTap')) || 1;
 
     const coin = document.getElementById('coin');
     const counter = document.getElementById('count');
     const energyDisplay = document.getElementById('energy');
 
+    function updateUI() {
+      counter.innerText = `${count} STIK`;
+      energyDisplay.innerText = `Energy: ${energy}`;
+      saveData();
+    }
+
+    function saveData() {
+      localStorage.setItem('count', count);
+      localStorage.setItem('energy', energy);
+      localStorage.setItem('clickPower', clickPower);
+      localStorage.setItem('autoTap', autoTap);
+    }
+
     // Восстановление энергии
     setInterval(() => {
-      if (energy < maxEnergy) {
-        energy = Math.min(energy + 3, maxEnergy);
-        energyDisplay.innerText = `Energy: ${energy}`;
+      if (energy < 5000) {
+        energy = Math.min(energy + 3, 5000);
+        updateUI();
       }
     }, 1000);
 
     // Автотап
     setInterval(() => {
       count += autoTap;
-      counter.innerText = `${count} STIK`;
+      updateUI();
     }, 1000);
 
     coin.addEventListener('click', () => {
       if (energy >= 5) {
         energy -= 5;
         count += clickPower;
-        counter.innerText = `${count} STIK`;
-        energyDisplay.innerText = `Energy: ${energy}`;
+        updateUI();
       }
     });
 
-    function upgrade() {
-      alert("Скоро появятся улучшения! 🚧");
+    function buyClickPower() {
+      const price = clickPower * 20;
+      if (count >= price) {
+        count -= price;
+        clickPower += 1;
+        updateUI();
+        alert(`Tap Power увеличен! Теперь: ${clickPower} за клик`);
+      } else {
+        alert(`Нужно ${price} STIK для улучшения`);
+      }
     }
 
-    function shop() {
-      alert("Магазин скоро будет доступен! 🛒");
+    function buyAutoTap() {
+      const price = autoTap * 50;
+      if (count >= price) {
+        count -= price;
+        autoTap += 1;
+        updateUI();
+        alert(`AutoTap увеличен! Теперь: ${autoTap}/сек`);
+      } else {
+        alert(`Нужно ${price} STIK для автотапа`);
+      }
     }
 
+    function reset() {
+      if (confirm("Сбросить прогресс?")) {
+        count = 0;
+        energy = 5000;
+        clickPower = 1;
+        autoTap = 1;
+        updateUI();
+      }
+    }
+
+    updateUI();
     Telegram.WebApp?.ready();
   </script>
 </body>
